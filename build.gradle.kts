@@ -22,7 +22,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-autoconfigure")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-
 }
 
 tasks.withType<KotlinCompile> {
