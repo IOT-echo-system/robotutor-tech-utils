@@ -1,7 +1,7 @@
 package com.shiviraj.iot.loggingstarter.logger
 
+import com.shiviraj.iot.loggingstarter.details.*
 import com.shiviraj.iot.loggingstarter.serializer.DefaultSerializer.serialize
-import com.shiviraj.iot.loggingstarter.details.LogDetails
 import org.slf4j.LoggerFactory
 
 class Logger(className: Class<out Any>) {
@@ -11,7 +11,19 @@ class Logger(className: Class<out Any>) {
         logger.info(serialize(details))
     }
 
-    fun error(details: LogDetails, exception: Throwable) {
+    fun error(details: LogErrorDetails, exception: Throwable) {
+        logger.error(serialize(details), exception)
+    }
+
+    fun apiRequestInfo(details: RequestDetails) {
+        logger.info(serialize(details))
+    }
+
+    fun apiResponseInfo(details: ResponseDetails) {
+        logger.info(serialize(details))
+    }
+
+    fun apiResponseError(details: ResponseErrorDetails, exception: Throwable) {
         logger.error(serialize(details), exception)
     }
 }

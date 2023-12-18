@@ -1,15 +1,14 @@
 package com.shiviraj.iot.loggingstarter
 
+import com.shiviraj.iot.loggingstarter.ReactiveContext.createResponseDetails
+import com.shiviraj.iot.loggingstarter.ReactiveContext.createResponseErrorDetails
 import com.shiviraj.iot.loggingstarter.ReactiveContext.getTraceId
-import com.shiviraj.iot.loggingstarter.details.LogDetails
-import com.shiviraj.iot.loggingstarter.details.LogErrorDetails
 import com.shiviraj.iot.loggingstarter.logger.Logger
 import com.shiviraj.iot.loggingstarter.utils.ThrowableWithTracingDetails
 import com.shiviraj.iot.loggingstarter.utils.getAdditionalDetails
 import reactor.core.publisher.Mono
-import reactor.core.publisher.SignalType
 
-fun <T> Mono<T>.logOnError(
+fun <T> Mono<T>.logOnErrorResponse(
     errorCode: String? = null,
     errorMessage: String,
     additionalDetails: Map<String, Any> = emptyMap(),
@@ -17,28 +16,27 @@ fun <T> Mono<T>.logOnError(
     skipAdditionalDetails: Boolean = false,
 ): Mono<T> {
     return doOnEach { signal ->
-        if (SignalType.ON_ERROR == signal.type) {
+        if (signal.isOnError) {
             val logger = Logger(this::class.java)
             val throwable = signal.throwable
 
             val modifiedAdditionalDetails = getAdditionalDetails(additionalDetails, skipAdditionalDetails, throwable)
 
-            val details = LogErrorDetails(
-                errorCode = errorCode,
-                errorMessage = errorMessage,
+            val details = createResponseErrorDetails(
+                context = signal.contextView,
+                message = errorMessage,
                 additionalDetails = modifiedAdditionalDetails,
                 searchableFields = searchableFields,
-                traceId = getTraceId(signal.contextView),
+                errorCode = errorCode
             )
 
-            val exception = ThrowableWithTracingDetails(throwable = throwable, traceId = "traceId")
-            logger.error(details = details, exception = exception)
+            val exception = ThrowableWithTracingDetails(throwable = throwable, traceId = getTraceId(signal.contextView))
+            logger.apiResponseError(details = details, exception = exception)
         }
     }
 }
 
-
-fun <T> Mono<T>.logOnSuccess(
+fun <T> Mono<T>.logOnSuccessResponse(
     message: String,
     additionalDetails: Map<String, Any> = emptyMap(),
     searchableFields: Map<String, Any?> = emptyMap(),
@@ -46,7 +44,7 @@ fun <T> Mono<T>.logOnSuccess(
     skipResponseBody: Boolean = true,
 ): Mono<T> {
     return doOnEach { signal ->
-        if (SignalType.ON_NEXT == signal.type) {
+        if (signal.isOnNext) {
             val modifiedAdditionalDetails = getAdditionalDetails<T>(
                 additionalDetails,
                 skipAdditionalDetails,
@@ -54,15 +52,14 @@ fun <T> Mono<T>.logOnSuccess(
                 signal
             )
 
-
             val logger = Logger(this::class.java)
-            val logDetails = LogDetails(
+            val responseDetails = createResponseDetails(
                 message = message,
+                context = signal.contextView,
                 additionalDetails = modifiedAdditionalDetails,
-                searchableFields = searchableFields,
-                traceId = getTraceId(signal.contextView),
+                searchableFields = searchableFields
             )
-            logger.info(details = logDetails)
+            logger.apiResponseInfo(details = responseDetails)
         }
     }
 }

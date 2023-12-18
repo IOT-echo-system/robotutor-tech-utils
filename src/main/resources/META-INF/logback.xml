@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <contextName>thanos-app</contextName>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                    <timeZone>IST</timeZone>
+                </timestamp>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <pattern>
+                    <pattern>
+                        {
+                        "details": "#tryJson{%message}"
+                        }
+                    </pattern>
+                </pattern>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <stackTrace>
+                    <fieldName>stack</fieldName>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
