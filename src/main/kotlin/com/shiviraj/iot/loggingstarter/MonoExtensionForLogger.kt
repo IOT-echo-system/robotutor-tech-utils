@@ -1,13 +1,19 @@
 package com.shiviraj.iot.loggingstarter
 
+import com.google.gson.JsonSyntaxException
 import com.shiviraj.iot.loggingstarter.ReactiveContext.getTraceId
 import com.shiviraj.iot.loggingstarter.details.LogDetails
-import com.shiviraj.iot.loggingstarter.details.LogErrorDetails
+import com.shiviraj.iot.loggingstarter.details.RequestDetails
+import com.shiviraj.iot.loggingstarter.details.ResponseDetails
 import com.shiviraj.iot.loggingstarter.logger.Logger
-import com.shiviraj.iot.loggingstarter.utils.ThrowableWithTracingDetails
-import com.shiviraj.iot.loggingstarter.utils.getAdditionalDetails
+import com.shiviraj.iot.loggingstarter.serializer.DefaultSerializer
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import reactor.core.publisher.SignalType
+import reactor.core.publisher.Signal
+import reactor.util.context.ContextView
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 fun <T> Mono<T>.logOnError(
     errorCode: String? = null,
@@ -17,53 +23,121 @@ fun <T> Mono<T>.logOnError(
     skipAdditionalDetails: Boolean = false,
 ): Mono<T> {
     return doOnEach { signal ->
-        if (SignalType.ON_ERROR == signal.type) {
+        if (signal.isOnError) {
             val logger = Logger(this::class.java)
+            val traceId = getTraceId(signal.contextView)
             val throwable = signal.throwable
 
-            val modifiedAdditionalDetails = getAdditionalDetails(additionalDetails, skipAdditionalDetails, throwable)
+            val modifiedAdditionalDetails = additionalDetails.toMutableMap()
+            if (skipAdditionalDetails) {
+                modifiedAdditionalDetails.clear()
+            }
 
-            val details = LogErrorDetails(
+            if (throwable is WebClientResponseException) {
+                modifiedAdditionalDetails[LogConstants.RESPONSE_BODY] = errorResponseBodyFrom(throwable)
+            }
+
+            val details = LogDetails(
                 errorCode = errorCode,
-                errorMessage = errorMessage,
-                additionalDetails = modifiedAdditionalDetails,
+                message = errorMessage,
+                traceId = traceId,
+                additionalDetails = modifiedAdditionalDetails.toMap(),
                 searchableFields = searchableFields,
-                traceId = getTraceId(signal.contextView),
+                responseTime = getResponseTime(signal.contextView),
             )
 
-            val exception = ThrowableWithTracingDetails(throwable = throwable, traceId = "traceId")
+            val exception = ThrowableWithTracingDetails(
+                throwable = throwable,
+                traceId = traceId,
+            )
+
             logger.error(details = details, exception = exception)
         }
     }
 }
 
+private fun errorResponseBodyFrom(exception: WebClientResponseException): Any {
+    val response = exception.responseBodyAsString
+    return try {
+        DefaultSerializer.deserialize(response, Map::class.java)
+    } catch (e: Throwable) {
+        response
+    }
+}
 
 fun <T> Mono<T>.logOnSuccess(
     message: String,
     additionalDetails: Map<String, Any> = emptyMap(),
-    searchableFields: Map<String, Any?> = emptyMap(),
+    searchableFields: Map<String, Any> = emptyMap(),
     skipAdditionalDetails: Boolean = false,
     skipResponseBody: Boolean = true,
 ): Mono<T> {
     return doOnEach { signal ->
-        if (SignalType.ON_NEXT == signal.type) {
-            val modifiedAdditionalDetails = getAdditionalDetails<T>(
-                additionalDetails,
-                skipAdditionalDetails,
-                skipResponseBody,
-                signal
-            )
+        if (signal.isOnNext) {
+            val modifiedAdditionalDetails = additionalDetails.toMutableMap()
 
+            if (skipAdditionalDetails) {
+                modifiedAdditionalDetails.clear()
+            }
+
+            if (!skipResponseBody) {
+                if (signal.hasValue())
+                    modifiedAdditionalDetails[LogConstants.RESPONSE_BODY] = getDeserializedResponseBody<T>(signal)
+                else
+                    modifiedAdditionalDetails[LogConstants.RESPONSE_BODY] = "No response body found"
+            }
 
             val logger = Logger(this::class.java)
-            val logDetails = LogDetails(
+            val logDetails = LogDetails.create(
                 message = message,
-                additionalDetails = modifiedAdditionalDetails,
-                searchableFields = searchableFields,
                 traceId = getTraceId(signal.contextView),
+                searchableFields = searchableFields,
+                errorCode = null,
+                requestDetails = RequestDetails.create(signal.contextView),
+                responseDetails = ResponseDetails.create(signal.contextView),
             )
+//            val contextView = signal.contextView
+//            println(contextView.size())
+//            if (contextView.hasKey(ServerWebExchange::class.java)) {
+//                val exchangeContext = contextView.get(ServerWebExchange::class.java)
+//                println("-----------${exchangeContext.response.statusCode}-----")
+//            }
+//            println("-------------------")
+//            println(logDetails)
+//            println(RequestDetails.create(signal.contextView))
+//            println(ResponseDetails.create(signal.contextView))
+//            println("-------------------")
             logger.info(details = logDetails)
         }
     }
 }
 
+fun getResponseTime(context: ContextView): Long {
+    return context.getOrEmpty<LocalDateTime>(LogConstants.API_CALL_START_TIME)
+        .map { (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - it.toEpochSecond(ZoneOffset.UTC)) * 1000 }
+        .orElseGet { -1 }
+}
+
+private fun <T> getDeserializedResponseBody(signal: Signal<T>): Any {
+    val data = signal.get()!!
+    return if (data is String) {
+        try {
+            DefaultSerializer.deserialize(data, Map::class.java)
+        } catch (e: JsonSyntaxException) {
+            data
+        }
+    } else {
+        data
+    }
+}
+
+object LogConstants {
+    const val LOG_TYPE = "logType"
+    const val RESPONSE_BODY = "responseBody"
+    const val API_CALL_START_TIME = "startTime"
+}
+
+class ThrowableWithTracingDetails(throwable: Throwable?, traceId: String?) : Throwable(
+    message = throwable?.message + "{ traceId: $traceId" + "  }",
+    cause = throwable
+)

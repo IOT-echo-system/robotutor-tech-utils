@@ -1,7 +1,7 @@
 package com.shiviraj.iot.loggingstarter.serializer
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.gson.Gson
 
 object ObjectMapperCache {
-    val objectMapper = ObjectMapper()
+    val objectMapper = Gson()
 }

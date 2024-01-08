@@ -11,19 +11,7 @@ class Logger(className: Class<out Any>) {
         logger.info(serialize(details))
     }
 
-    fun error(details: LogErrorDetails, exception: Throwable) {
-        logger.error(serialize(details), exception)
-    }
-
-    fun apiRequestInfo(details: RequestDetails) {
-        logger.info(serialize(details))
-    }
-
-    fun apiResponseInfo(details: ResponseDetails) {
-        logger.info(serialize(details))
-    }
-
-    fun apiResponseError(details: ResponseErrorDetails, exception: Throwable) {
+    fun error(details: LogDetails, exception: Throwable) {
         logger.error(serialize(details), exception)
     }
 }
