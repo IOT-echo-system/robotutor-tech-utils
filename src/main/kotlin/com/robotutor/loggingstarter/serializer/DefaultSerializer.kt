@@ -1,6 +1,4 @@
-package com.shiviraj.iot.loggingstarter.serializer
-
-import com.google.gson.Gson
+package com.robotutor.loggingstarter.serializer
 
 object DefaultSerializer {
     fun serialize(obj: Any?): String {

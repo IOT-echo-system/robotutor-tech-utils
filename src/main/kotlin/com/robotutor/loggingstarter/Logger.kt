@@ -1,7 +1,7 @@
-package com.shiviraj.iot.loggingstarter.logger
+package com.robotutor.loggingstarter
 
-import com.shiviraj.iot.loggingstarter.details.*
-import com.shiviraj.iot.loggingstarter.serializer.DefaultSerializer.serialize
+import com.robotutor.loggingstarter.LogDetails
+import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.slf4j.LoggerFactory
 
 class Logger(className: Class<out Any>) {

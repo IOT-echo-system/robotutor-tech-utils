@@ -1,14 +1,9 @@
-package com.shiviraj.iot.loggingstarter
+package com.robotutor.loggingstarter
 
 import com.google.gson.JsonSyntaxException
-import com.shiviraj.iot.loggingstarter.ReactiveContext.getTraceId
-import com.shiviraj.iot.loggingstarter.details.LogDetails
-import com.shiviraj.iot.loggingstarter.details.RequestDetails
-import com.shiviraj.iot.loggingstarter.details.ResponseDetails
-import com.shiviraj.iot.loggingstarter.logger.Logger
-import com.shiviraj.iot.loggingstarter.serializer.DefaultSerializer
+import com.robotutor.loggingstarter.ReactiveContext.getTraceId
+import com.robotutor.loggingstarter.serializer.DefaultSerializer
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Signal
 import reactor.util.context.ContextView
@@ -95,18 +90,9 @@ fun <T> Mono<T>.logOnSuccess(
                 errorCode = null,
                 requestDetails = RequestDetails.create(signal.contextView),
                 responseDetails = ResponseDetails.create(signal.contextView),
+                additionalDetails = modifiedAdditionalDetails
+
             )
-//            val contextView = signal.contextView
-//            println(contextView.size())
-//            if (contextView.hasKey(ServerWebExchange::class.java)) {
-//                val exchangeContext = contextView.get(ServerWebExchange::class.java)
-//                println("-----------${exchangeContext.response.statusCode}-----")
-//            }
-//            println("-------------------")
-//            println(logDetails)
-//            println(RequestDetails.create(signal.contextView))
-//            println(ResponseDetails.create(signal.contextView))
-//            println("-------------------")
             logger.info(details = logDetails)
         }
     }

@@ -1,6 +1,5 @@
-package com.shiviraj.iot.loggingstarter.details
+package com.robotutor.loggingstarter
 
-import com.shiviraj.iot.loggingstarter.getResponseTime
 import org.springframework.http.HttpMethod
 import org.springframework.web.server.ServerWebExchange
 import reactor.util.context.ContextView
@@ -28,6 +27,7 @@ data class LogDetails(
             responseDetails: ResponseDetails? = null,
             traceId: String? = null,
             searchableFields: Map<String, Any> = emptyMap(),
+            additionalDetails: Map<String, Any> = emptyMap(),
         ): LogDetails {
             return LogDetails(
                 message = message,
@@ -42,6 +42,7 @@ data class LogDetails(
                 responseBody = responseDetails?.body,
                 traceId = traceId,
                 searchableFields = searchableFields,
+                additionalDetails = additionalDetails
             )
         }
     }
