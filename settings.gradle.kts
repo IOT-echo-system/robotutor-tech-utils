@@ -1,1 +1,1 @@
-rootProject.name = "logging-starter"
+rootProject.name = "robotutor-tech-utils"

@@ -1,3 +1,4 @@
+
 plugins {
     id("org.springframework.boot") version "3.2.0"
     id("io.spring.dependency-management") version "1.1.4"
@@ -11,13 +12,13 @@ publishing {
         create<MavenPublication>("gpr") {
             from(components["java"])
             groupId = "com.robotutor"
-            artifactId = "logging-starter"
-            version = "1.0.2"
+            artifactId = "robotutor-tech-utils"
+            version = "1.0.0"
 
             pom {
                 name.set("Reactive Logging Starter")
                 description.set("A reactive logging starter package")
-                url.set("https://maven.pkg.github.com/IOT-echo-system/logging-starter")
+                url.set("https://maven.pkg.github.com/IOT-echo-system/robotutor-tech-utils")
             }
         }
     }
@@ -25,7 +26,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/IOT-echo-system/logging-starter")
+            url = uri("https://maven.pkg.github.com/IOT-echo-system/robotutor-tech-utils")
             credentials {
                 username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
                 password = project.findProperty("gpr.token") as String? ?: System.getenv("TOKEN")
@@ -34,7 +35,7 @@ publishing {
     }
 }
 
-group = "com.shiviraj.iot"
+group = "com.robotutor.iot"
 version = "0.0.1"
 
 java {
@@ -44,10 +45,10 @@ java {
 repositories {
     mavenCentral()
     maven {
-        url = uri("https://maven.pkg.github.com/IOT-echo-system/logging-starter")
+        url = uri("https://maven.pkg.github.com/IOT-echo-system/web-client-starter")
         credentials {
             username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+            password = project.findProperty("gpr.token") as String? ?: System.getenv("TOKEN")
         }
     }
 }
@@ -57,6 +58,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.robotutor:logging-starter:1.0.2")
+    implementation("com.robotutor:web-client-starter:1.0.0")
 }
 
 

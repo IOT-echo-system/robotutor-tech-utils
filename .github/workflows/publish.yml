@@ -25,6 +25,9 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build
+        env:
+          USERNAME: ${{ secrets.ACTOR }}
+          TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: Publish to GitHub Packages
         run: ./gradlew publish
