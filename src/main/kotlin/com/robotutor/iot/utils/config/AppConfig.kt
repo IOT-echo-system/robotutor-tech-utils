@@ -6,5 +6,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class AppConfig(
     val authServiceBaseUrl: String,
     val openApiEndpoints: List<String>,
-    val openApiEndPointsForAccount: List<String>
 )

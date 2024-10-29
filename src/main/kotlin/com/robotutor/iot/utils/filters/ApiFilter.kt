@@ -8,6 +8,8 @@ import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.loggingstarter.logOnError
 import com.robotutor.loggingstarter.logOnSuccess
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -24,9 +26,14 @@ class ApiFilter(
     private val routeValidator: RouteValidator,
     private val authGateway: AuthGateway
 ) : WebFilter {
+
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val startTime = LocalDateTime.now()
+        val additionalDetails = mapOf("method" to exchange.request.method, "path" to exchange.request.uri.path)
         return authorize(exchange)
+            .logOnSuccess("Successfully authorized request", additionalDetails = additionalDetails)
+            .logOnError("", "Failed to authorize request", additionalDetails = additionalDetails)
             .flatMap { userAuthenticationData ->
                 chain.filter(exchange)
                     .contextWrite {
@@ -50,13 +57,7 @@ class ApiFilter(
             .contextWrite { it.put("startTime", startTime) }
             .doFinally {
                 Mono.just("")
-                    .logOnSuccess(
-                        "Successfully send api response",
-                        additionalDetails = mapOf(
-                            "method" to exchange.request.method,
-                            "path" to exchange.request.uri.path
-                        )
-                    )
+                    .logOnSuccess("Successfully send api response", additionalDetails = additionalDetails)
                     .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
                     .contextWrite { it.put("startTime", startTime) }
                     .subscribe()
@@ -74,7 +75,6 @@ class ApiFilter(
     }
 
     private fun authorizeUser(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
-        val additionalDetails = mapOf("method" to exchange.request.method, "path" to exchange.request.uri.path)
         return if (routeValidator.isSecured(exchange.request)) {
             authGateway.validate(exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0))
                 .map { userAuthenticationResponseData -> UserAuthenticationData.from(userAuthenticationResponseData) }
@@ -82,7 +82,5 @@ class ApiFilter(
         } else {
             createMono(UserAuthenticationData("Authorization not required", "account", "role", null))
         }
-            .logOnSuccess("Successfully authorized user", additionalDetails = additionalDetails)
-            .logOnError("", "Failed to authorize user", additionalDetails = additionalDetails)
     }
 }
