@@ -3,15 +3,14 @@ package com.robotutor.iot.utils.filters
 import com.robotutor.iot.exceptions.IOTError
 import com.robotutor.iot.exceptions.UnAuthorizedException
 import com.robotutor.iot.utils.createMono
-import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.gateway.AuthGateway
 import com.robotutor.iot.utils.models.UserAuthenticationData
+import com.robotutor.loggingstarter.logOnError
 import com.robotutor.loggingstarter.logOnSuccess
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
@@ -75,6 +74,7 @@ class ApiFilter(
     }
 
     private fun authorizeUser(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
+        val additionalDetails = mapOf("method" to exchange.request.method, "path" to exchange.request.uri.path)
         return if (routeValidator.isSecured(exchange.request)) {
             authGateway.validate(exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0))
                 .map { userAuthenticationResponseData -> UserAuthenticationData.from(userAuthenticationResponseData) }
@@ -82,21 +82,7 @@ class ApiFilter(
         } else {
             createMono(UserAuthenticationData("Authorization not required", "account", "role", null))
         }
-            .flatMap { userAuthenticationData ->
-                if (isAllowedForAccounts(userAuthenticationData, exchange.request)) {
-                    createMono(userAuthenticationData)
-                } else {
-                    createMonoError(UnAuthorizedException(IOTError.IOT0101))
-                }
-            }
-    }
-
-    private fun isAllowedForAccounts(
-        userAuthenticationData: UserAuthenticationData,
-        request: ServerHttpRequest
-    ): Boolean {
-        val areAccountAndRoleNotBlank =
-            userAuthenticationData.accountId.isNotBlank() && userAuthenticationData.roleId.isNotBlank()
-        return areAccountAndRoleNotBlank || routeValidator.isOpenForAccounts(request)
+            .logOnSuccess("Successfully authorized user", additionalDetails = additionalDetails)
+            .logOnError("", "Failed to authorize user", additionalDetails = additionalDetails)
     }
 }
