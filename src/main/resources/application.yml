@@ -1,0 +1,5 @@
+app:
+  utils:
+    auth-service-base-url: ${AUTH_SERVICE_BASE_URL}
+    open-api-endpoints:
+      - users/register
