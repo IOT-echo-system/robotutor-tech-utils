@@ -1,4 +1,4 @@
-package com.robotutor.authService.testUtils
+package com.robotutor.testUtils
 
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
