@@ -1,4 +1,3 @@
-
 plugins {
     id("org.springframework.boot") version "3.2.0"
     id("io.spring.dependency-management") version "1.1.4"
@@ -14,6 +13,8 @@ publishing {
             groupId = "com.robotutor"
             artifactId = "robotutor-tech-utils"
             version = "1.0.8"
+
+            artifact(tasks["testJar"])
 
             pom {
                 name.set("Common Reactive Utils library")
@@ -88,3 +89,9 @@ tasks.withType<Test> {
 tasks.named("bootJar") {
     enabled = false
 }
+
+tasks.register<Jar>("testJar") {
+    archiveClassifier.set("tests")
+    from(sourceSets["test"].output)
+}
+
