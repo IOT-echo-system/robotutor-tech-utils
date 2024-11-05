@@ -65,6 +65,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.robotutor:logging-starter:1.0.0")
     implementation("com.robotutor:web-client-starter:1.0.2")
+
+    testImplementation("io.projectreactor:reactor-test")
 }
 
 
