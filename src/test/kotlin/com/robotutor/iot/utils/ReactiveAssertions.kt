@@ -1,4 +1,4 @@
-package com.robotutor.iot.utils.testUtils
+package com.robotutor.iot.utils
 
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier

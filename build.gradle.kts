@@ -13,7 +13,7 @@ publishing {
             from(components["java"])
             groupId = "com.robotutor"
             artifactId = "robotutor-tech-utils"
-            version = "1.0.6"
+            version = "1.0.7"
 
             pom {
                 name.set("Common Reactive Utils library")
@@ -66,7 +66,12 @@ dependencies {
     implementation("com.robotutor:logging-starter:1.0.0")
     implementation("com.robotutor:web-client-starter:1.0.2")
 
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.8.0")
 }
 
 
@@ -76,9 +81,9 @@ kotlin {
     }
 }
 
-//tasks.withType<Test> {
-//    useJUnitPlatform()
-//}
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
 
 tasks.named("bootJar") {
     enabled = false
