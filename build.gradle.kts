@@ -13,11 +13,11 @@ publishing {
             from(components["java"])
             groupId = "com.robotutor"
             artifactId = "robotutor-tech-utils"
-            version = "1.0.3"
+            version = "1.0.4"
 
             pom {
-                name.set("Reactive Logging Starter")
-                description.set("A reactive logging starter package")
+                name.set("Common Reactive Utils library")
+                description.set("A reactive utils starter package")
                 url.set("https://maven.pkg.github.com/IOT-echo-system/robotutor-tech-utils")
             }
         }
