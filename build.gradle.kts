@@ -13,7 +13,7 @@ publishing {
             from(components["java"])
             groupId = "com.robotutor"
             artifactId = "robotutor-tech-utils"
-            version = "1.0.7"
+            version = "1.0.8"
 
             pom {
                 name.set("Common Reactive Utils library")
