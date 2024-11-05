@@ -6,6 +6,11 @@ plugins {
     `maven-publish`
 }
 
+tasks.register<Jar>("testJar") {
+    archiveClassifier.set("tests")
+    from(sourceSets["test"].output)
+}
+
 publishing {
     publications {
         create<MavenPublication>("gpr") {
@@ -88,10 +93,5 @@ tasks.withType<Test> {
 
 tasks.named("bootJar") {
     enabled = false
-}
-
-tasks.register<Jar>("testJar") {
-    archiveClassifier.set("tests")
-    from(sourceSets["test"].output)
 }
 
