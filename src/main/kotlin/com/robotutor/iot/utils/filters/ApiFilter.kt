@@ -2,6 +2,7 @@ package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.exceptions.IOTError
 import com.robotutor.iot.exceptions.UnAuthorizedException
+import com.robotutor.iot.utils.config.AppConfig
 import com.robotutor.iot.utils.createMono
 import com.robotutor.iot.utils.gateway.AuthGateway
 import com.robotutor.iot.utils.models.UserAuthenticationData
@@ -24,7 +25,8 @@ import java.time.LocalDateTime
 @Component
 class ApiFilter(
     private val routeValidator: RouteValidator,
-    private val authGateway: AuthGateway
+    private val authGateway: AuthGateway,
+    private val appConfig: AppConfig
 ) : WebFilter {
 
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -75,12 +77,17 @@ class ApiFilter(
     }
 
     private fun authorizeUser(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
+        val token = exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0)
         return if (routeValidator.isSecured(exchange.request)) {
-            authGateway.validate(exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0))
-                .map { userAuthenticationResponseData -> UserAuthenticationData.from(userAuthenticationResponseData) }
-                .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
+            if (token == appConfig.internalAccessToken) {
+                createMono(UserAuthenticationData("Internal access token", "account", "role", null))
+            } else {
+                authGateway.validate(token)
+                    .map { userAuthenticationResponseData -> UserAuthenticationData.from(userAuthenticationResponseData) }
+            }
         } else {
             createMono(UserAuthenticationData("Authorization not required", "account", "role", null))
         }
+            .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
     }
 }

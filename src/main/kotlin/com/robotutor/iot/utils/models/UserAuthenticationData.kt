@@ -1,18 +1,18 @@
 package com.robotutor.iot.utils.models
 
-import com.robotutor.iot.utils.gateway.views.UserAuthenticationResponseData
+import com.robotutor.iot.utils.gateway.views.AuthenticationResponseData
 
 interface IAuthenticationData
 
 data class UserAuthenticationData(val userId: String, val accountId: String, val roleId: String, val boardId: String?) :
     IAuthenticationData {
     companion object {
-        fun from(userAuthenticationResponseData: UserAuthenticationResponseData): UserAuthenticationData {
+        fun from(authenticationResponseData: AuthenticationResponseData): UserAuthenticationData {
             return UserAuthenticationData(
-                userId = userAuthenticationResponseData.userId,
-                accountId = userAuthenticationResponseData.projectId,
-                roleId = userAuthenticationResponseData.roleId,
-                boardId = userAuthenticationResponseData.boardId
+                userId = authenticationResponseData.userId,
+                accountId = authenticationResponseData.projectId,
+                roleId = authenticationResponseData.roleId,
+                boardId = authenticationResponseData.boardId
             )
         }
     }
