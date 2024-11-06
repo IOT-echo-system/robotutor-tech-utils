@@ -27,8 +27,8 @@ class ApiFilter(
     private val routeValidator: RouteValidator,
     private val authGateway: AuthGateway,
     private val appConfig: AppConfig,
-    private val logger: Logger
 ) : WebFilter {
+    private val logger = Logger(ApiFilter::class.java)
 
     @Order(Ordered.HIGHEST_PRECEDENCE)
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
