@@ -6,8 +6,7 @@ import com.robotutor.iot.utils.config.AppConfig
 import com.robotutor.iot.utils.createMono
 import com.robotutor.iot.utils.gateway.AuthGateway
 import com.robotutor.iot.utils.models.UserAuthenticationData
-import com.robotutor.loggingstarter.logOnError
-import com.robotutor.loggingstarter.logOnSuccess
+import com.robotutor.loggingstarter.*
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -21,12 +20,14 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Component
 class ApiFilter(
     private val routeValidator: RouteValidator,
     private val authGateway: AuthGateway,
-    private val appConfig: AppConfig
+    private val appConfig: AppConfig,
+    private val logger: Logger
 ) : WebFilter {
 
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -34,13 +35,10 @@ class ApiFilter(
         val startTime = LocalDateTime.now()
         val additionalDetails = mapOf("method" to exchange.request.method, "path" to exchange.request.uri.path)
         return authorize(exchange)
-            .logOnSuccess("Successfully authorized request", additionalDetails = additionalDetails)
             .logOnError("", "Failed to authorize request", additionalDetails = additionalDetails)
             .flatMap { userAuthenticationData ->
                 chain.filter(exchange)
-                    .contextWrite {
-                        it.put(UserAuthenticationData::class.java, userAuthenticationData)
-                    }
+                    .contextWrite { it.put(UserAuthenticationData::class.java, userAuthenticationData) }
             }
             .onErrorResume {
                 val unAuthorizedException = UnAuthorizedException(IOTError.IOT0101)
@@ -55,14 +53,29 @@ class ApiFilter(
                 )
             }
             .publishOn(Schedulers.boundedElastic())
-            .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
-            .contextWrite { it.put("startTime", startTime) }
+            .contextWrite {
+                it.put(ServerWebExchange::class.java, exchange).put("startTime", startTime)
+            }
             .doFinally {
-                Mono.just("")
-                    .logOnSuccess("Successfully send api response", additionalDetails = additionalDetails)
-                    .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
-                    .contextWrite { it.put("startTime", startTime) }
-                    .subscribe()
+                val logDetails = LogDetails.create(
+                    message = "Successfully send api response",
+                    traceId = exchange.request.headers.getFirst("x-trace-id"),
+                    requestDetails = RequestDetails(
+                        method = exchange.request.method,
+                        headers = exchange.request.headers,
+                        uriWithParams = exchange.request.uri.toString(),
+                        body = exchange.request.body.toString()
+                    ),
+                    responseDetails = ResponseDetails(
+                        headers = exchange.response.headers,
+                        statusCode = exchange.response.statusCode.toString(),
+                        time = (LocalDateTime.now()
+                            .toEpochSecond(ZoneOffset.UTC) - startTime.toEpochSecond(ZoneOffset.UTC)) * 1000,
+                        body = exchange.response.bufferFactory().toString()
+                    ),
+                    additionalDetails = additionalDetails
+                )
+                logger.info(logDetails)
             }
     }
 
