@@ -30,8 +30,9 @@ class UserDataResolver(private val policyGateway: PolicyGateway) : HandlerMethod
             val userData = context.get(UserData::class.java)
             if (annotation != null) {
                 policyGateway.getPolicies(userData.roleId)
-                    .map { policiesResponseData ->
-                        policiesResponseData.policies.any { it.name == annotation.policyName }
+                    .collectList()
+                    .map { policies ->
+                        policies.any { it.name == annotation.policyName }
                     }
                     .flatMap {
                         if (it) {
