@@ -7,6 +7,6 @@ data class AppConfig(
     val authServiceBaseUrl: String,
     val internalAccessToken: String,
     val openApiEndpoints: List<String> = emptyList(),
-    val validatePath: String = "/validate",
+    val validatePath: String = "/auth/validate",
     val getPoliciesPath: String = "/roles/{roleId}/policies"
 )
