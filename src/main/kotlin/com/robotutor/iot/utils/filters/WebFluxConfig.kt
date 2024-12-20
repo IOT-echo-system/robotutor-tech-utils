@@ -7,12 +7,10 @@ import org.springframework.web.reactive.result.method.annotation.ArgumentResolve
 @Component
 class WebConfig(
     private val boardDataResolver: BoardDataResolver,
-    private val boardAuthenticationDataResolver: BoardAuthenticationDataResolver,
-    private val authenticationDataResolver: AuthenticationDataResolver
+    private val userDataResolver: UserDataResolver
 ) : WebFluxConfigurer {
     override fun configureArgumentResolvers(configurer: ArgumentResolverConfigurer) {
-        configurer.addCustomResolver(authenticationDataResolver)
+        configurer.addCustomResolver(userDataResolver)
         configurer.addCustomResolver(boardDataResolver)
-        configurer.addCustomResolver(boardAuthenticationDataResolver)
     }
 }

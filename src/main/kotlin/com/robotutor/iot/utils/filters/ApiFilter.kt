@@ -5,7 +5,7 @@ import com.robotutor.iot.exceptions.UnAuthorizedException
 import com.robotutor.iot.utils.config.AppConfig
 import com.robotutor.iot.utils.createMono
 import com.robotutor.iot.utils.gateway.AuthGateway
-import com.robotutor.iot.utils.models.UserAuthenticationData
+import com.robotutor.iot.utils.models.UserData
 import com.robotutor.loggingstarter.*
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.springframework.core.Ordered
@@ -36,9 +36,9 @@ class ApiFilter(
         val additionalDetails = mapOf("method" to exchange.request.method, "path" to exchange.request.uri.path)
         return authorize(exchange)
             .logOnError("", "Failed to authorize request", additionalDetails = additionalDetails)
-            .flatMap { userAuthenticationData ->
+            .flatMap { userData ->
                 chain.filter(exchange)
-                    .contextWrite { it.put(UserAuthenticationData::class.java, userAuthenticationData) }
+                    .contextWrite { it.put(UserData::class.java, userData) }
             }
             .onErrorResume {
                 val unAuthorizedException = UnAuthorizedException(IOTError.IOT0101)
@@ -79,27 +79,27 @@ class ApiFilter(
             }
     }
 
-    private fun authorize(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
+    private fun authorize(exchange: ServerWebExchange): Mono<UserData> {
         return Mono.deferContextual { context ->
             try {
-                createMono(context.get(UserAuthenticationData::class.java))
+                createMono(context.get(UserData::class.java))
             } catch (ex: Exception) {
                 authorizeUser(exchange)
             }
         }
     }
 
-    private fun authorizeUser(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
+    private fun authorizeUser(exchange: ServerWebExchange): Mono<UserData> {
         val token = exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0)
         return if (routeValidator.isSecured(exchange.request)) {
             if (token == appConfig.internalAccessToken) {
-                createMono(UserAuthenticationData("Internal access token", "account", "role", null))
+                createMono(UserData("Internal user", "role"))
             } else {
                 authGateway.validate(token)
-                    .map { userAuthenticationResponseData -> UserAuthenticationData.from(userAuthenticationResponseData) }
+                    .map { userAuthenticationResponseData -> UserData.from(userAuthenticationResponseData) }
             }
         } else {
-            createMono(UserAuthenticationData("Authorization not required", "account", "role", null))
+            createMono(UserData("unauthorized user", "role"))
         }
             .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
     }

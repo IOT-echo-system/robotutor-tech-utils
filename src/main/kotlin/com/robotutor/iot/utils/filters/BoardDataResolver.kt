@@ -4,8 +4,7 @@ import com.robotutor.iot.exceptions.DataNotFoundException
 import com.robotutor.iot.exceptions.IOTError
 import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.gateway.BoardGateway
-import com.robotutor.iot.utils.models.UserAuthenticationData
-import com.robotutor.iot.utils.models.UserBoardAuthenticationData
+import com.robotutor.iot.utils.models.BoardData
 import org.springframework.core.MethodParameter
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.BindingContext
@@ -16,7 +15,7 @@ import reactor.core.publisher.Mono
 @Component
 class BoardDataResolver(private val boardGateway: BoardGateway) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
-        return parameter.parameterType == UserBoardAuthenticationData::class.java
+        return parameter.parameterType == BoardData::class.java
     }
 
     override fun resolveArgument(
@@ -26,11 +25,10 @@ class BoardDataResolver(private val boardGateway: BoardGateway) : HandlerMethodA
     ): Mono<Any> {
 
         return Mono.deferContextual { context ->
-            val userAuthenticationData = context.get(UserAuthenticationData::class.java)
             val boardId = exchange.request.headers.getFirst("boardId") ?: "boardId"
-            boardGateway.isValidBoard(userAuthenticationData, boardId)
+            boardGateway.isValidBoard()
                 .map {
-                    UserBoardAuthenticationData(boardId = boardId, accountId = userAuthenticationData.accountId)
+                    BoardData(boardId = boardId, roleId = "")
                 }
                 .switchIfEmpty(
                     createMonoError(DataNotFoundException(IOTError.IOT0102))
