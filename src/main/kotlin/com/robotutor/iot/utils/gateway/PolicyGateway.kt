@@ -10,14 +10,13 @@ import reactor.core.publisher.Flux
 
 @Component
 class PolicyGateway(private val webClientWrapper: WebClientWrapper, private val appConfig: AppConfig) {
-    fun getPolicies(roleId: String): Flux<PolicyView> {
+    fun getPolicies(): Flux<PolicyView> {
         return webClientWrapper.getFlux(
             baseUrl = appConfig.authServiceBaseUrl,
             path = appConfig.getPoliciesPath,
             returnType = PolicyView::class.java,
-            uriVariables = mapOf("roleId" to roleId)
         )
-            .logOnSuccess("Successfully get policies by roleId: $roleId")
-            .logOnError("", "Failed to get policies by roleId: $roleId")
+            .logOnSuccess("Successfully get policies")
+            .logOnError("", "Failed to get policies")
     }
 }

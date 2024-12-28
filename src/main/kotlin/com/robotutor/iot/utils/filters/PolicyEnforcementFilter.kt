@@ -5,7 +5,6 @@ import com.robotutor.iot.exceptions.IOTError
 import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.gateway.PolicyGateway
-import com.robotutor.iot.utils.models.UserData
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
@@ -36,21 +35,17 @@ class PolicyEnforcementFilter(
     }
 
     private fun validatePolicy(policyName: String): Mono<Void> {
-        return Mono.deferContextual { context ->
-            val userData = context.get(UserData::class.java)
-            policyGateway.getPolicies(userData.roleId)
-                .collectList()
-                .map { policies ->
-                    policies.any { it.name == policyName }
+        return policyGateway.getPolicies()
+            .collectList()
+            .map { policies ->
+                policies.any { it.name == policyName }
+            }
+            .flatMap {
+                if (it) {
+                    Mono.empty()
+                } else {
+                    createMonoError(AccessDeniedException(IOTError.IOT0103))
                 }
-                .flatMap {
-                    if (it) {
-                        Mono.empty()
-                    } else {
-                        createMonoError(AccessDeniedException(IOTError.IOT0103))
-                    }
-                }
-        }
-
+            }
     }
 }
