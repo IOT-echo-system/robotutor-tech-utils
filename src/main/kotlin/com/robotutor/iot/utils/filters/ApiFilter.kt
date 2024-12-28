@@ -23,6 +23,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @Component
+@Order(1)
 class ApiFilter(
     private val routeValidator: RouteValidator,
     private val authGateway: AuthGateway,
@@ -30,7 +31,6 @@ class ApiFilter(
 ) : WebFilter {
     private val logger = Logger(ApiFilter::class.java)
 
-    @Order(Ordered.HIGHEST_PRECEDENCE)
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val startTime = LocalDateTime.now()
         val additionalDetails = mapOf("method" to exchange.request.method, "path" to exchange.request.uri.path)

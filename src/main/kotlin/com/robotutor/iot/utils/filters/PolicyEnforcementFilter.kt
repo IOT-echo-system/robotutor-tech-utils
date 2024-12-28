@@ -6,6 +6,7 @@ import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.gateway.PolicyGateway
 import com.robotutor.iot.utils.models.UserData
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping
@@ -15,6 +16,7 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
 @Component
+@Order(2)
 class PolicyEnforcementFilter(
     private val handlerMapping: RequestMappingHandlerMapping,
     private val policyGateway: PolicyGateway
