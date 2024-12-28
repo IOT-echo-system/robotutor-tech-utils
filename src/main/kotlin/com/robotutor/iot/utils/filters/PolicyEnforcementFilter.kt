@@ -2,12 +2,14 @@ package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.exceptions.AccessDeniedException
 import com.robotutor.iot.exceptions.IOTError
-import com.robotutor.iot.utils.createMono
 import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.gateway.PolicyGateway
 import com.robotutor.loggingstarter.logOnError
+import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.springframework.core.annotation.Order
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping
@@ -28,14 +30,14 @@ class PolicyEnforcementFilter(
                 if (handler is HandlerMethod) {
                     val requirePolicy = handler.getMethodAnnotation(RequirePolicy::class.java)
                     if (requirePolicy != null) {
-                        return@flatMap validatePolicy(requirePolicy.policyName).flatMap { Mono.empty() }
+                        return@flatMap validatePolicy(exchange, requirePolicy.policyName)
                     }
                 }
                 chain.filter(exchange)
             }
     }
 
-    private fun validatePolicy(policyName: String): Mono<String> {
+    private fun validatePolicy(exchange: ServerWebExchange, policyName: String): Mono<Void> {
         return policyGateway.getPolicies()
             .collectList()
             .map { policies ->
@@ -43,11 +45,24 @@ class PolicyEnforcementFilter(
             }
             .flatMap {
                 if (it) {
-                    createMono(policyName)
+                    Mono.empty()
                 } else {
-                    createMonoError(AccessDeniedException(IOTError.IOT0103))
+                    createMonoError<Void>(AccessDeniedException(IOTError.IOT0103))
+                        .logOnError(errorCode = IOTError.IOT0103.errorCode, errorMessage = IOTError.IOT0103.message)
+                        .onErrorResume {
+                            val unAuthorizedException = AccessDeniedException(IOTError.IOT0103)
+                            val response = exchange.response
+
+                            response.statusCode = HttpStatus.UNAUTHORIZED
+                            response.headers.contentType = MediaType.APPLICATION_JSON
+                            response.writeWith(
+                                Mono.just(
+                                    response.bufferFactory()
+                                        .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
+                                )
+                            )
+                        }
                 }
             }
-            .logOnError(errorCode = IOTError.IOT0103.message, errorMessage = IOTError.IOT0103.message)
     }
 }

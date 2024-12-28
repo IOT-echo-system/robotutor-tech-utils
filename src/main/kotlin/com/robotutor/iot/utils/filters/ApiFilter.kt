@@ -8,7 +8,6 @@ import com.robotutor.iot.utils.gateway.AuthGateway
 import com.robotutor.iot.utils.models.UserData
 import com.robotutor.loggingstarter.*
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
-import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
