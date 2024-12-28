@@ -30,14 +30,14 @@ class PolicyEnforcementFilter(
                 if (handler is HandlerMethod) {
                     val requirePolicy = handler.getMethodAnnotation(RequirePolicy::class.java)
                     if (requirePolicy != null) {
-                        return@flatMap validatePolicy(exchange, requirePolicy.policyName)
+                        return@flatMap validatePolicy(exchange, chain, requirePolicy.policyName)
                     }
                 }
                 chain.filter(exchange)
             }
     }
 
-    private fun validatePolicy(exchange: ServerWebExchange, policyName: String): Mono<Void> {
+    private fun validatePolicy(exchange: ServerWebExchange, chain: WebFilterChain, policyName: String): Mono<Void> {
         return policyGateway.getPolicies()
             .collectList()
             .map { policies ->
@@ -45,7 +45,7 @@ class PolicyEnforcementFilter(
             }
             .flatMap {
                 if (it) {
-                    Mono.empty()
+                    chain.filter(exchange)
                 } else {
                     createMonoError<Void>(AccessDeniedException(IOTError.IOT0103))
                         .logOnError(errorCode = IOTError.IOT0103.errorCode, errorMessage = IOTError.IOT0103.message)
