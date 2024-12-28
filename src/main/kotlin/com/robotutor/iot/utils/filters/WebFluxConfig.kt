@@ -5,7 +5,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
 
 @Component
-class WebConfig(
+class WebFluxConfig(
     private val boardDataResolver: BoardDataResolver,
     private val userDataResolver: UserDataResolver
 ) : WebFluxConfigurer {
