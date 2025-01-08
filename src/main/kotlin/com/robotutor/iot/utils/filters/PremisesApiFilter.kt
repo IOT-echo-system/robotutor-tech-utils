@@ -20,7 +20,8 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway) : WebFilte
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val requestPath = exchange.request.path.pathWithinApplication()
-        if (requestPath.value().startsWith("/premises/")) {
+        val regex = Regex("^/premises/\\d+/", RegexOption.IGNORE_CASE)
+        if (regex.containsMatchIn(requestPath.value())) {
             val premisesId = requestPath.value().split("/")[2]
             return premisesGateway.getPremises(premisesId)
                 .flatMap { premises ->
