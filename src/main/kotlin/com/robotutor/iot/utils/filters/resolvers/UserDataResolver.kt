@@ -1,4 +1,4 @@
-package com.robotutor.iot.utils.filters
+package com.robotutor.iot.utils.filters.resolvers
 
 import com.robotutor.iot.utils.createMono
 import com.robotutor.iot.utils.models.UserData

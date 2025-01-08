@@ -1,5 +1,5 @@
 app:
   utils:
-    auth-service-base-url: {AUTH_SERVICE_BASE_URL}
-    internal-access-token: {INTERNAL_ACCESS_TOKEN}
-    validate-path: /auth/validate
+    auth-service-base-url: { AUTH_SERVICE_BASE_URL }
+    internal-access-token: { INTERNAL_ACCESS_TOKEN }
+    premises-service-base-url: { PREMISES_SERVICE_BASE_URL }

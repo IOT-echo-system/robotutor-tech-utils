@@ -1,7 +1,7 @@
-package com.robotutor.iot.utils.filters
+package com.robotutor.iot.utils.filters.resolvers
 
 import com.robotutor.iot.exceptions.DataNotFoundException
-import com.robotutor.iot.exceptions.IOTError
+import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.gateway.BoardGateway
 import com.robotutor.iot.utils.models.BoardData

@@ -15,5 +15,7 @@ data class UserData(val userId: String, val roleId: String) : IAuthenticationDat
     }
 }
 
+data class PremisesData(val premisesId: String) : IAuthenticationData {}
+
 data class BoardData(val boardId: String, val roleId: String) : IAuthenticationData {
 }
