@@ -16,7 +16,7 @@ class PolicyGateway(
     private val cacheService: CacheService
 ) {
     fun getPolicies(traceId: String): Flux<PolicyView> {
-        return cacheService.retrieves("policyGateway::$traceId") {
+        return cacheService.retrieves("policyGateway::$traceId", PolicyView::class.java, 60) {
             webClientWrapper.getFlux(
                 baseUrl = appConfig.authServiceBaseUrl,
                 path = appConfig.getPoliciesPath,

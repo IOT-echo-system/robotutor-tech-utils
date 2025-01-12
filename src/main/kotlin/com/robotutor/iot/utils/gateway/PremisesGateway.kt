@@ -15,7 +15,7 @@ class PremisesGateway(
     private val cacheService: CacheService
 ) {
     fun getPremises(premiseId: String, traceId: String): Mono<PremisesData> {
-        return cacheService.retrieve("premisesGateway::$traceId") {
+        return cacheService.retrieve("premisesGateway::$traceId", PremisesData::class.java, 60) {
             webClient.get(
                 baseUrl = premisesConfig.premisesServiceBaseUrl,
                 path = premisesConfig.premisesPath,

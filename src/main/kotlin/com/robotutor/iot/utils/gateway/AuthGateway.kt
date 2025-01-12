@@ -15,7 +15,7 @@ class AuthGateway(
 ) {
     fun validate(token: String, traceId: String): Mono<AuthenticationResponseData> {
         val header = mapOf("token" to token)
-        return cacheService.retrieve("authGateway::$traceId", 60) {
+        return cacheService.retrieve("authGateway::$traceId", AuthenticationResponseData::class.java, 60) {
             webClient.get(
                 baseUrl = appConfig.authServiceBaseUrl,
                 path = appConfig.validatePath,
