@@ -14,21 +14,18 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
+const val PREMISES_ID_HEADER_KEY = "x-premises-id"
+
 @Component
 @Order(3)
 class PremisesApiFilter(private val premisesGateway: PremisesGateway) : WebFilter {
-
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        val requestPath = exchange.request.path.pathWithinApplication()
-        val regex = Regex("^/premises/\\d+/", RegexOption.IGNORE_CASE)
-        if (regex.containsMatchIn(requestPath.value())) {
-            val premisesId = requestPath.value().split("/")[2]
-            return premisesGateway.getPremises(premisesId)
+        val premisesId = getPremisesId(exchange)
+        if (premisesId != null) {
+            return premisesGateway.getPremises(premisesId, getTraceId(exchange))
                 .flatMap { premises ->
                     chain.filter(exchange)
-                        .contextWrite {
-                            it.put(PremisesData::class.java, premises)
-                        }
+                        .contextWrite { it.put(PremisesData::class.java, premises) }
                 }
                 .onErrorResume {
                     val unAuthorizedException = AccessDeniedException(IOTError.IOT0104)
@@ -42,9 +39,12 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway) : WebFilte
                                 .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
                         )
                     )
-                    response.setComplete()
                 }
         }
         return chain.filter(exchange)
+    }
+
+    private fun getPremisesId(exchange: ServerWebExchange): String? {
+        return exchange.request.headers[PREMISES_ID_HEADER_KEY]?.first()
     }
 }

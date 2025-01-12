@@ -38,7 +38,7 @@ class PolicyEnforcementFilter(
     }
 
     private fun validatePolicy(exchange: ServerWebExchange, chain: WebFilterChain, policyName: String): Mono<Void> {
-        return policyGateway.getPolicies()
+        return policyGateway.getPolicies(getTraceId(exchange))
             .collectList()
             .map { policies ->
                 policies.any { it.name == policyName }

@@ -1,4 +1,12 @@
 fileignoreconfig:
-- filename: build.gradle.kts
-  checksum: 8dc87eac49316e122fa0f4a01a5a2fb86d00ee165b1785c4f80a7deb8dc0e287
+- filename: src/main/kotlin/com/robotutor/iot/utils/filters/ApiFilter.kt
+  checksum: 0d429a341fb21e1f87f3a3699c3a8ae7e7578c037a57658c3ad2362c4edf82ef
+- filename: src/main/kotlin/com/robotutor/iot/utils/gateway/PremisesGateway.kt
+  checksum: 6fdd0b51a3be70d3a23980f013511c8a1182a86e53ccdc3ca28f888d0b760d49
+- filename: src/main/kotlin/com/robotutor/iot/utils/gateway/AuthGateway.kt
+  checksum: 987a8a46651ac1d52378c950928acc39a8134e0619a0cd08e8f0b0328d5ed579
+- filename: src/main/kotlin/com/robotutor/iot/utils/gateway/PolicyGateway.kt
+  checksum: 8835497f71c5185a3016a330a968bf48279daa4f2a5be86fc6395ebc465487c9
+- filename: src/main/kotlin/com/robotutor/iot/utils/filters/PremisesApiFilter.kt
+  checksum: 633f4611c240f573748af85a75c7710a07f485edf8b78d9c6aca4dcaab90a77b
 version: ""

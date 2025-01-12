@@ -21,6 +21,8 @@ import reactor.core.scheduler.Schedulers
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+const val TRACE_ID_HEADER_KEY = "x-trace-id"
+
 @Component
 @Order(1)
 class ApiFilter(
@@ -90,11 +92,12 @@ class ApiFilter(
 
     private fun authorizeUser(exchange: ServerWebExchange): Mono<UserData> {
         val token = exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0)
+
         return if (routeValidator.isSecured(exchange.request)) {
             if (token == appConfig.internalAccessToken) {
                 createMono(UserData("Internal user", "role"))
             } else {
-                authGateway.validate(token)
+                authGateway.validate(token ?: "", getTraceId(exchange))
                     .map { userAuthenticationResponseData -> UserData.from(userAuthenticationResponseData) }
             }
         } else {
@@ -102,4 +105,8 @@ class ApiFilter(
         }
             .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
     }
+}
+
+fun getTraceId(exchange: ServerWebExchange): String {
+    return exchange.request.headers[TRACE_ID_HEADER_KEY]?.first() ?: "missing-trace-id"
 }

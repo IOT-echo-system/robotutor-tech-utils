@@ -4,12 +4,14 @@ import com.robotutor.iot.service.WebClientWrapper
 import com.robotutor.iot.utils.config.PremisesConfig
 import com.robotutor.iot.utils.gateway.views.PremisesResponseData
 import com.robotutor.iot.utils.models.PremisesData
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
 @Component
 class PremisesGateway(private val webClient: WebClientWrapper, private val premisesConfig: PremisesConfig) {
-    fun getPremises(premiseId: String): Mono<PremisesData> {
+    @Cacheable("premisesGateway", key = "#traceId")
+    fun getPremises(premiseId: String, traceId: String): Mono<PremisesData> {
         return webClient.get(
             baseUrl = premisesConfig.premisesServiceBaseUrl,
             path = premisesConfig.premisesPath,
