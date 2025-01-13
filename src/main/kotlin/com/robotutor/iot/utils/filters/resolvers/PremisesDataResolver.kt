@@ -26,8 +26,10 @@ class PremisesDataResolver : HandlerMethodArgumentResolver {
         return Mono.deferContextual { context ->
             val premisesData = context.getOrEmpty<PremisesData>(PremisesData::class.java)
             if (premisesData.isPresent) {
+                println("----------successfully resolved premises data for ${exchange.request.path.value()}-------------")
                 createMono(premisesData.get())
             } else {
+                println("----------failed to resolve premises data for ${exchange.request.path.value()}-------------")
                 createMonoError(UnAuthorizedException(IOTError.IOT0106))
             }
         }

@@ -38,10 +38,12 @@ class ApiFilter(
         return authorize(exchange)
             .logOnError("", "Failed to authorize request", additionalDetails = additionalDetails)
             .flatMap { userData ->
+                println("--------user data in authorized filter map $userData---------")
                 chain.filter(exchange)
                     .contextWrite { it.put(UserData::class.java, userData) }
             }
             .onErrorResume {
+                println("--------error in api filter map $it---------")
                 val unAuthorizedException = UnAuthorizedException(IOTError.IOT0101)
                 val response = exchange.response
 
@@ -60,7 +62,7 @@ class ApiFilter(
             .doFinally {
                 val logDetails = LogDetails.create(
                     message = "Successfully send api response",
-                    traceId = exchange.request.headers.getFirst("x-trace-id"),
+                    traceId = getTraceId(exchange),
                     requestDetails = RequestDetails(
                         method = exchange.request.method,
                         headers = exchange.request.headers,
@@ -97,8 +99,11 @@ class ApiFilter(
             if (token == appConfig.internalAccessToken) {
                 createMono(UserData("Internal user", "role"))
             } else {
+                println("----------Authorized user-----------")
                 authGateway.validate(exchange)
-                    .map { userAuthenticationResponseData -> UserData.from(userAuthenticationResponseData) }
+                    .doOnError {
+                        println("------Error on authorized---------")
+                    }
             }
         } else {
             createMono(UserData("unauthorized user", "role"))

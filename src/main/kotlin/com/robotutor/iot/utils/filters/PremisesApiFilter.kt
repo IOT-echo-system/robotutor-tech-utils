@@ -23,16 +23,19 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway, private va
     WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         if (premisesConfig.validatedPremisesPaths.any { path -> exchange.request.path.value().startsWith(path) }) {
-            val premisesId = getPremisesId(exchange)
-            return premisesGateway.getPremises(premisesId, exchange)
+            println("---------premises filter is applied for ${exchange.request.path.value()}------------")
+            return premisesGateway.getPremises(exchange)
                 .flatMap { premises ->
+                    println("----------successfully get premises for ${exchange.request.path.value()}-------------")
                     chain.filter(exchange)
                         .contextWrite { it.put(PremisesData::class.java, premises) }
                 }
                 .onErrorResume {
+                    println("----------failed to get premises for ${exchange.request.path.value()}-------------")
                     sendUnAuthorizedException(exchange)
                 }
         }
+        println("---------premises filter is not applied------------")
         return chain.filter(exchange)
     }
 

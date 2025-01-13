@@ -5,6 +5,7 @@ import com.robotutor.iot.service.WebClientWrapper
 import com.robotutor.iot.utils.config.AppConfig
 import com.robotutor.iot.utils.filters.getTraceId
 import com.robotutor.iot.utils.gateway.views.AuthenticationResponseData
+import com.robotutor.iot.utils.models.UserData
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
@@ -15,16 +16,15 @@ class AuthGateway(
     private val appConfig: AppConfig,
     private val cacheService: CacheService
 ) {
-    fun validate(exchange: ServerWebExchange): Mono<AuthenticationResponseData> {
+    fun validate(exchange: ServerWebExchange): Mono<UserData> {
         val traceId = getTraceId(exchange)
-        return cacheService.retrieve("authGateway::$traceId", AuthenticationResponseData::class.java, 60) {
+        return cacheService.retrieve("authGateway::$traceId", UserData::class.java, 60) {
             webClient.get(
                 baseUrl = appConfig.authServiceBaseUrl,
                 path = appConfig.validatePath,
                 returnType = AuthenticationResponseData::class.java,
-                skipLoggingResponseBody = false,
-                skipLoggingAdditionalDetails = false
             )
+                .map { authenticationResponseData -> UserData.from(authenticationResponseData) }
         }
     }
 }
