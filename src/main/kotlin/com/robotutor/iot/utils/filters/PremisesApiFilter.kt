@@ -23,7 +23,7 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway, private va
     WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         if (premisesConfig.validatedPremisesPaths.any { path -> exchange.request.path.value().startsWith(path) }) {
-            val premisesId = getPremisesId(exchange) ?: return sendUnAuthorizedException(exchange)
+            val premisesId = getPremisesId(exchange)
             return premisesGateway.getPremises(premisesId, exchange)
                 .flatMap { premises ->
                     chain.filter(exchange)

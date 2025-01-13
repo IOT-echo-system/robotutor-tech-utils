@@ -16,14 +16,11 @@ class AuthGateway(
     private val cacheService: CacheService
 ) {
     fun validate(exchange: ServerWebExchange): Mono<AuthenticationResponseData> {
-        val token = exchange.request.headers[org.springframework.http.HttpHeaders.AUTHORIZATION]?.get(0) ?: ""
         val traceId = getTraceId(exchange)
-        val headers = mapOf("token" to token)
         return cacheService.retrieve("authGateway::$traceId", AuthenticationResponseData::class.java, 60) {
             webClient.get(
                 baseUrl = appConfig.authServiceBaseUrl,
                 path = appConfig.validatePath,
-                headers = headers,
                 returnType = AuthenticationResponseData::class.java,
                 skipLoggingResponseBody = false,
                 skipLoggingAdditionalDetails = false
