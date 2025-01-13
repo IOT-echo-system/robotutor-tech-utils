@@ -7,6 +7,8 @@ import com.robotutor.iot.utils.filters.getPremisesId
 import com.robotutor.iot.utils.filters.getTraceId
 import com.robotutor.iot.utils.gateway.views.PremisesResponseData
 import com.robotutor.iot.utils.models.PremisesData
+import com.robotutor.loggingstarter.logOnError
+import com.robotutor.loggingstarter.logOnSuccess
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
@@ -28,6 +30,8 @@ class PremisesGateway(
                 returnType = PremisesResponseData::class.java,
             )
                 .map { PremisesData.from(it) }
+                .logOnSuccess("Successfully get premises for $traceId")
+                .logOnError("", "Failed to get premises for $traceId")
         }
     }
 }

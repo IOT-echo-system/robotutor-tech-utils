@@ -25,8 +25,8 @@ class PolicyGateway(
                 path = appConfig.getPoliciesPath,
                 returnType = PolicyView::class.java,
             )
-                .logOnSuccess("Successfully get policies")
-                .logOnError("", "Failed to get policies")
+                .logOnSuccess("Successfully get policies for $traceId")
+                .logOnError("", "Failed to get policies for $traceId")
         }
     }
 }

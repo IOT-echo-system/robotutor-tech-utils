@@ -45,10 +45,8 @@ class PolicyEnforcementFilter(
             }
             .flatMap {
                 if (it) {
-                    println("---------successfully validated policy-----------")
                     chain.filter(exchange)
                 } else {
-                    println("---------failed to validate policy-----------")
                     createMonoError<Void>(AccessDeniedException(IOTError.IOT0103))
                         .logOnError(errorCode = IOTError.IOT0103.errorCode, errorMessage = IOTError.IOT0103.message)
                         .onErrorResume {

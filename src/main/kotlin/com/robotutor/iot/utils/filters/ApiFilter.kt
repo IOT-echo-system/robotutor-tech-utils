@@ -36,14 +36,11 @@ class ApiFilter(
         val startTime = LocalDateTime.now()
         val additionalDetails = mapOf("method" to exchange.request.method, "path" to exchange.request.uri.path)
         return authorize(exchange)
-            .logOnError("", "Failed to authorize request", additionalDetails = additionalDetails)
             .flatMap { userData ->
-                println("--------user data in authorized filter map $userData---------")
                 chain.filter(exchange)
                     .contextWrite { it.put(UserData::class.java, userData) }
             }
             .onErrorResume {
-                println("--------error in api filter map $it---------")
                 val unAuthorizedException = UnAuthorizedException(IOTError.IOT0101)
                 val response = exchange.response
 
@@ -99,11 +96,7 @@ class ApiFilter(
             if (token == appConfig.internalAccessToken) {
                 createMono(UserData("Internal user", "role"))
             } else {
-                println("----------Authorized user-----------")
                 authGateway.validate(exchange)
-                    .doOnError {
-                        println("------Error on authorized---------")
-                    }
             }
         } else {
             createMono(UserData("unauthorized user", "role"))

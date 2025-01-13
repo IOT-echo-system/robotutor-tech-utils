@@ -6,6 +6,8 @@ import com.robotutor.iot.utils.config.AppConfig
 import com.robotutor.iot.utils.filters.getTraceId
 import com.robotutor.iot.utils.gateway.views.AuthenticationResponseData
 import com.robotutor.iot.utils.models.UserData
+import com.robotutor.loggingstarter.logOnError
+import com.robotutor.loggingstarter.logOnSuccess
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
@@ -25,6 +27,8 @@ class AuthGateway(
                 returnType = AuthenticationResponseData::class.java,
             )
                 .map { authenticationResponseData -> UserData.from(authenticationResponseData) }
+                .logOnSuccess("Successfully authenticated user for $traceId")
+                .logOnError("", "Failed to authenticate user for $traceId")
         }
     }
 }
