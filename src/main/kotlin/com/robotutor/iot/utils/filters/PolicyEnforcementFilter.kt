@@ -1,8 +1,8 @@
 package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.exceptions.AccessDeniedException
-import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.createMonoError
+import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.gateway.PolicyGateway
 import com.robotutor.loggingstarter.logOnError
@@ -38,7 +38,7 @@ class PolicyEnforcementFilter(
     }
 
     private fun validatePolicy(exchange: ServerWebExchange, chain: WebFilterChain, policyName: String): Mono<Void> {
-        return policyGateway.getPolicies(getTraceId(exchange))
+        return policyGateway.getPolicies(exchange)
             .collectList()
             .map { policies ->
                 policies.any { it.name == policyName }

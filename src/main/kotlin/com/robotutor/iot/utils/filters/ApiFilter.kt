@@ -97,7 +97,7 @@ class ApiFilter(
             if (token == appConfig.internalAccessToken) {
                 createMono(UserData("Internal user", "role"))
             } else {
-                authGateway.validate(token ?: "", getTraceId(exchange))
+                authGateway.validate(exchange)
                     .map { userAuthenticationResponseData -> UserData.from(userAuthenticationResponseData) }
             }
         } else {

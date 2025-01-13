@@ -8,5 +8,5 @@ fileignoreconfig:
 - filename: src/main/kotlin/com/robotutor/iot/utils/gateway/PolicyGateway.kt
   checksum: 8835497f71c5185a3016a330a968bf48279daa4f2a5be86fc6395ebc465487c9
 - filename: src/main/kotlin/com/robotutor/iot/utils/filters/PremisesApiFilter.kt
-  checksum: 633f4611c240f573748af85a75c7710a07f485edf8b78d9c6aca4dcaab90a77b
+  checksum: 66766380a10b7da563d8f25be04b4585638f091ef8f89f86ccd6773cb7a5e51f
 version: ""

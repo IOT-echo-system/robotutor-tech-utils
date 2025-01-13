@@ -24,7 +24,7 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway, private va
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         if (premisesConfig.validatedPremisesPaths.any { path -> exchange.request.path.value().startsWith(path) }) {
             val premisesId = getPremisesId(exchange) ?: return sendUnAuthorizedException(exchange)
-            return premisesGateway.getPremises(premisesId, getTraceId(exchange))
+            return premisesGateway.getPremises(premisesId, exchange)
                 .flatMap { premises ->
                     chain.filter(exchange)
                         .contextWrite { it.put(PremisesData::class.java, premises) }
@@ -49,8 +49,8 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway, private va
             )
         )
     }
+}
 
-    private fun getPremisesId(exchange: ServerWebExchange): String? {
-        return exchange.request.headers[PREMISES_ID_HEADER_KEY]?.first()
-    }
+fun getPremisesId(exchange: ServerWebExchange): String {
+    return exchange.request.headers[PREMISES_ID_HEADER_KEY]?.first() ?: "missing-premises-id"
 }
