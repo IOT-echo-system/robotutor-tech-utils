@@ -1,6 +1,9 @@
 package com.robotutor.iot.utils.filters.resolvers
 
+import com.robotutor.iot.exceptions.UnAuthorizedException
 import com.robotutor.iot.utils.createMono
+import com.robotutor.iot.utils.createMonoError
+import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.models.UserData
 import org.springframework.core.MethodParameter
 import org.springframework.stereotype.Component
@@ -21,8 +24,12 @@ class UserDataResolver : HandlerMethodArgumentResolver {
         exchange: ServerWebExchange
     ): Mono<Any> {
         return Mono.deferContextual { context ->
-            val userData = context.get(UserData::class.java)
-            createMono(userData)
+            val userData = context.getOrEmpty<UserData>(UserData::class.java)
+            if (userData.isPresent) {
+                createMono(userData.get())
+            } else {
+                createMonoError(UnAuthorizedException(IOTError.IOT0105))
+            }
         }
     }
 }

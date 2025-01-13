@@ -1,6 +1,7 @@
 package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.exceptions.AccessDeniedException
+import com.robotutor.iot.utils.config.PremisesConfig
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.gateway.PremisesGateway
 import com.robotutor.iot.utils.models.PremisesData
@@ -18,30 +19,35 @@ const val PREMISES_ID_HEADER_KEY = "x-premises-id"
 
 @Component
 @Order(3)
-class PremisesApiFilter(private val premisesGateway: PremisesGateway) : WebFilter {
+class PremisesApiFilter(private val premisesGateway: PremisesGateway, private val premisesConfig: PremisesConfig) :
+    WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        val premisesId = getPremisesId(exchange)
-        if (premisesId != null) {
+        if (premisesConfig.validatedPremisesPaths.any { path -> exchange.request.path.value().startsWith(path) }) {
+            val premisesId = getPremisesId(exchange) ?: return sendUnAuthorizedException(exchange)
             return premisesGateway.getPremises(premisesId, getTraceId(exchange))
                 .flatMap { premises ->
                     chain.filter(exchange)
                         .contextWrite { it.put(PremisesData::class.java, premises) }
                 }
                 .onErrorResume {
-                    val unAuthorizedException = AccessDeniedException(IOTError.IOT0104)
-                    val response = exchange.response
-
-                    response.statusCode = HttpStatus.UNAUTHORIZED
-                    response.headers.contentType = MediaType.APPLICATION_JSON
-                    response.writeWith(
-                        Mono.just(
-                            response.bufferFactory()
-                                .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
-                        )
-                    )
+                    sendUnAuthorizedException(exchange)
                 }
         }
         return chain.filter(exchange)
+    }
+
+    private fun sendUnAuthorizedException(exchange: ServerWebExchange): Mono<Void> {
+        val unAuthorizedException = AccessDeniedException(IOTError.IOT0104)
+        val response = exchange.response
+
+        response.statusCode = HttpStatus.UNAUTHORIZED
+        response.headers.contentType = MediaType.APPLICATION_JSON
+        return response.writeWith(
+            Mono.just(
+                response.bufferFactory()
+                    .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
+            )
+        )
     }
 
     private fun getPremisesId(exchange: ServerWebExchange): String? {

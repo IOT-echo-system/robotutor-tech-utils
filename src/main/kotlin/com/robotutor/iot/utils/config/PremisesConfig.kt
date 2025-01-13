@@ -6,4 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class PremisesConfig(
     val premisesServiceBaseUrl: String = "",
     val premisesPath: String = "/premises/{premisesId}",
+    val validatedPremisesPaths: List<String> = emptyList(),
 )
