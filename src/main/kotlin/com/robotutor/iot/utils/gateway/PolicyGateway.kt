@@ -5,8 +5,6 @@ import com.robotutor.iot.service.WebClientWrapper
 import com.robotutor.iot.utils.config.AppConfig
 import com.robotutor.iot.utils.filters.getTraceId
 import com.robotutor.iot.utils.gateway.views.PolicyView
-import com.robotutor.loggingstarter.logOnError
-import com.robotutor.loggingstarter.logOnSuccess
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
@@ -26,7 +24,5 @@ class PolicyGateway(
                 returnType = PolicyView::class.java,
             )
         }
-            .logOnSuccess("Successfully get policies for $traceId")
-            .logOnError("", "Failed to get policies for $traceId")
     }
 }
