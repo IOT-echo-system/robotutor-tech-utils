@@ -19,14 +19,14 @@ class PolicyGateway(
 ) {
     fun getPolicies(exchange: ServerWebExchange): Flux<PolicyView> {
         val traceId = getTraceId(exchange)
-        return cacheService.retrieves("policyGateway::$traceId", 60) {
+        return cacheService.retrieves("policyGateway::$traceId", PolicyView::class.java, 60) {
             webClientWrapper.getFlux(
                 baseUrl = appConfig.authServiceBaseUrl,
                 path = appConfig.getPoliciesPath,
                 returnType = PolicyView::class.java,
             )
-                .logOnSuccess("Successfully get policies for $traceId")
-                .logOnError("", "Failed to get policies for $traceId")
         }
+            .logOnSuccess("Successfully get policies for $traceId")
+            .logOnError("", "Failed to get policies for $traceId")
     }
 }

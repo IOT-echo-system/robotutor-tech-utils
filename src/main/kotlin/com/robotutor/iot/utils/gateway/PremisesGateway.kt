@@ -30,8 +30,8 @@ class PremisesGateway(
                 returnType = PremisesResponseData::class.java,
             )
                 .map { PremisesData.from(it) }
-                .logOnSuccess("Successfully get premises for $traceId")
-                .logOnError("", "Failed to get premises for $traceId")
         }
+            .logOnSuccess("Successfully get premises for $traceId")
+            .logOnError("", "Failed to get premises for $traceId")
     }
 }
