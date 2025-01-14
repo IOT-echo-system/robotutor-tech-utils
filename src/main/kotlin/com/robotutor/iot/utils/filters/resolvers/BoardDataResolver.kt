@@ -30,9 +30,7 @@ class BoardDataResolver(private val boardGateway: BoardGateway) : HandlerMethodA
                 .map {
                     BoardData(boardId = boardId, roleId = "")
                 }
-                .switchIfEmpty(
-                    createMonoError(DataNotFoundException(IOTError.IOT0102))
-                )
+                .switchIfEmpty(createMonoError(DataNotFoundException(IOTError.IOT0102)))
         }
     }
 }

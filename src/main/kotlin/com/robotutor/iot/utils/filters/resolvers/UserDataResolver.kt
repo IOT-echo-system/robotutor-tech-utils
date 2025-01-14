@@ -26,10 +26,8 @@ class UserDataResolver : HandlerMethodArgumentResolver {
         return Mono.deferContextual { context ->
             val userData = context.getOrEmpty<UserData>(UserData::class.java)
             if (userData.isPresent) {
-                println("----------successfully resolved user data for ${exchange.request.path.value()}-------------")
                 createMono(userData.get())
             } else {
-                println("----------failed to resolve user data for ${exchange.request.path.value()}-------------")
                 createMonoError(UnAuthorizedException(IOTError.IOT0105))
             }
         }

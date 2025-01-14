@@ -1,6 +1,7 @@
 package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.exceptions.AccessDeniedException
+import com.robotutor.iot.utils.createMono
 import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
@@ -39,10 +40,7 @@ class PolicyEnforcementFilter(
 
     private fun validatePolicy(exchange: ServerWebExchange, chain: WebFilterChain, policyName: String): Mono<Void> {
         return policyGateway.getPolicies(exchange)
-            .collectList()
-            .map { policies ->
-                policies.any { it.name == policyName }
-            }
+            .any { it.name == policyName }
             .flatMap {
                 if (it) {
                     chain.filter(exchange)
@@ -55,12 +53,9 @@ class PolicyEnforcementFilter(
 
                             response.statusCode = HttpStatus.UNAUTHORIZED
                             response.headers.contentType = MediaType.APPLICATION_JSON
-                            response.writeWith(
-                                Mono.just(
-                                    response.bufferFactory()
-                                        .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
-                                )
-                            )
+                            val content = response.bufferFactory()
+                                .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
+                            response.writeWith(createMono(content))
                         }
                 }
             }

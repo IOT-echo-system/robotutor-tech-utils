@@ -17,7 +17,7 @@ publishing {
             from(components["java"])
             groupId = "com.robotutor"
             artifactId = "robotutor-tech-utils"
-            version = "1.0.36"
+            version = "1.0.37"
 
             artifact(tasks["testJar"])
 
@@ -69,9 +69,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("com.google.code.gson:gson:2.8.9")
-    implementation("com.robotutor:logging-starter:1.0.3")
+    implementation("com.robotutor:logging-starter:1.0.4")
     implementation("com.robotutor:web-client-starter:1.0.6")
-    implementation("com.robotutor:redis-starter:1.0.23")
+    implementation("com.robotutor:redis-starter:1.0.24")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

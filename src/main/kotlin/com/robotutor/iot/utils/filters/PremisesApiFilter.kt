@@ -2,6 +2,7 @@ package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.exceptions.AccessDeniedException
 import com.robotutor.iot.utils.config.PremisesConfig
+import com.robotutor.iot.utils.createMono
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.gateway.PremisesGateway
 import com.robotutor.iot.utils.models.PremisesData
@@ -41,12 +42,9 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway, private va
 
         response.statusCode = HttpStatus.UNAUTHORIZED
         response.headers.contentType = MediaType.APPLICATION_JSON
-        return response.writeWith(
-            Mono.just(
-                response.bufferFactory()
-                    .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
-            )
-        )
+        val content = response.bufferFactory()
+            .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
+        return response.writeWith(createMono(content))
     }
 }
 

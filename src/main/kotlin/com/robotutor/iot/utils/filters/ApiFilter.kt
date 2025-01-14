@@ -6,7 +6,10 @@ import com.robotutor.iot.utils.createMono
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.gateway.AuthGateway
 import com.robotutor.iot.utils.models.UserData
-import com.robotutor.loggingstarter.*
+import com.robotutor.loggingstarter.LogDetails
+import com.robotutor.loggingstarter.Logger
+import com.robotutor.loggingstarter.RequestDetails
+import com.robotutor.loggingstarter.ResponseDetails
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
@@ -46,11 +49,9 @@ class ApiFilter(
 
                 response.statusCode = HttpStatus.UNAUTHORIZED
                 response.headers.contentType = MediaType.APPLICATION_JSON
-                response.writeWith(
-                    Mono.just(
-                        response.bufferFactory().wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
-                    )
-                )
+                val content = response.bufferFactory()
+                    .wrap(serialize(unAuthorizedException.errorResponse()).toByteArray())
+                response.writeWith(createMono(content))
             }
             .publishOn(Schedulers.boundedElastic())
             .contextWrite {
