@@ -9,5 +9,4 @@ enum class IOTError(override val errorCode: String, override val message: String
     IOT0104("IOT-0104", "User doesn't belong to this premises."),
     IOT0105("IOT-0105", "Unable to resolve user data"),
     IOT0106("IOT-0106", "Unable to resolve premises data"),
-    IOT0107("IOT-0107", "Unable to resolve board data"),
 }

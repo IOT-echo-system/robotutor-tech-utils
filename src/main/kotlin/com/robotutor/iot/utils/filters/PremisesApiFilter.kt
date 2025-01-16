@@ -1,10 +1,13 @@
 package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.exceptions.AccessDeniedException
+import com.robotutor.iot.exceptions.UnAuthorizedException
 import com.robotutor.iot.utils.config.PremisesConfig
 import com.robotutor.iot.utils.createMono
+import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.gateway.PremisesGateway
+import com.robotutor.iot.utils.gateway.views.PremisesRole
 import com.robotutor.iot.utils.models.PremisesData
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.springframework.core.annotation.Order
@@ -50,4 +53,12 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway, private va
 
 fun getPremisesId(exchange: ServerWebExchange): String {
     return exchange.request.headers[PREMISES_ID_HEADER_KEY]?.first() ?: "missing-premises-id"
+}
+
+fun <T : Any> validatePremisesOwner(premisesData: PremisesData, executeIf: () -> Mono<T>): Mono<T> {
+    return createMono(premisesData.user.role == PremisesRole.OWNER)
+        .flatMap {
+            if (it) executeIf()
+            else createMonoError(UnAuthorizedException(IOTError.IOT0104))
+        }
 }
