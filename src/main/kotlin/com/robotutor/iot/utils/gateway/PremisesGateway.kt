@@ -7,6 +7,7 @@ import com.robotutor.iot.utils.filters.getPremisesId
 import com.robotutor.iot.utils.filters.getTraceId
 import com.robotutor.iot.utils.gateway.views.PremisesResponseData
 import com.robotutor.iot.utils.models.PremisesData
+import com.robotutor.loggingstarter.Logger
 import com.robotutor.loggingstarter.logOnError
 import com.robotutor.loggingstarter.logOnSuccess
 import org.springframework.stereotype.Component
@@ -19,6 +20,7 @@ class PremisesGateway(
     private val premisesConfig: PremisesConfig,
     private val cacheService: CacheService
 ) {
+    val logger = Logger(this::class.java)
     fun getPremises(exchange: ServerWebExchange): Mono<PremisesData> {
         val traceId = getTraceId(exchange)
         val premisesId = getPremisesId(exchange)
@@ -31,7 +33,7 @@ class PremisesGateway(
             )
                 .map { PremisesData.from(it) }
         }
-            .logOnSuccess("Successfully get premises for $traceId")
-            .logOnError("", "Failed to get premises for $traceId")
+            .logOnSuccess(logger, "Successfully get premises for $traceId")
+            .logOnError(logger, "", "Failed to get premises for $traceId")
     }
 }

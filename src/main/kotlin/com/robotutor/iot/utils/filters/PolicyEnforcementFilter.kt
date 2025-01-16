@@ -6,6 +6,7 @@ import com.robotutor.iot.utils.createMonoError
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.gateway.PolicyGateway
+import com.robotutor.loggingstarter.Logger
 import com.robotutor.loggingstarter.logOnError
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.springframework.core.annotation.Order
@@ -25,6 +26,7 @@ class PolicyEnforcementFilter(
     private val handlerMapping: RequestMappingHandlerMapping,
     private val policyGateway: PolicyGateway
 ) : WebFilter {
+    val logger = Logger(this::class.java)
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return handlerMapping.getHandler(exchange)
             .flatMap { handler ->
@@ -46,7 +48,7 @@ class PolicyEnforcementFilter(
                     chain.filter(exchange)
                 } else {
                     createMonoError<Void>(AccessDeniedException(IOTError.IOT0103))
-                        .logOnError(errorCode = IOTError.IOT0103.errorCode, errorMessage = IOTError.IOT0103.message)
+                        .logOnError(logger, IOTError.IOT0103.errorCode, IOTError.IOT0103.message)
                         .onErrorResume {
                             val unAuthorizedException = AccessDeniedException(IOTError.IOT0103)
                             val response = exchange.response
