@@ -62,6 +62,7 @@ repositories {
 
     githubMavenRepository("web-client-starter")
     githubMavenRepository("logging-starter")
+    githubMavenRepository("redis-starter")
 }
 
 dependencies {
@@ -69,10 +70,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("com.google.code.gson:gson:2.8.9")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.robotutor:logging-starter:1.0.5")
     implementation("com.robotutor:web-client-starter:1.0.6")
-    implementation("com.robotutor:redis-starter:1.0.26")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("com.robotutor:redis-starter:1.0.27")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
