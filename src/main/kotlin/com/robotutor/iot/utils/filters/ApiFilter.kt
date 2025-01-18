@@ -8,8 +8,9 @@ import com.robotutor.iot.utils.gateway.AuthGateway
 import com.robotutor.iot.utils.models.UserData
 import com.robotutor.loggingstarter.LogDetails
 import com.robotutor.loggingstarter.Logger
-import com.robotutor.loggingstarter.RequestDetails
-import com.robotutor.loggingstarter.ResponseDetails
+import com.robotutor.loggingstarter.models.RequestDetails
+import com.robotutor.loggingstarter.models.ResponseDetails
+import com.robotutor.loggingstarter.models.ServerWebExchangeDTO
 import com.robotutor.loggingstarter.serializer.DefaultSerializer.serialize
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
@@ -55,7 +56,8 @@ class ApiFilter(
             }
             .publishOn(Schedulers.boundedElastic())
             .contextWrite {
-                it.put(ServerWebExchange::class.java, exchange).put("startTime", startTime)
+                it.put(ServerWebExchangeDTO::class.java, ServerWebExchangeDTO.from(exchange))
+                    .put("startTime", startTime)
             }
             .doFinally {
                 val logDetails = LogDetails.create(
@@ -102,7 +104,6 @@ class ApiFilter(
         } else {
             createMono(UserData("unauthorized user", "role"))
         }
-            .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
     }
 }
 
