@@ -27,6 +27,7 @@ class PolicyGateway(
                 path = appConfig.getPoliciesPath,
                 returnType = PolicyView::class.java,
             )
+                .collectList()
         }
             .logOnSuccess(logger, "Successfully get policies")
             .logOnError(logger, "", "Successfully get policies")
