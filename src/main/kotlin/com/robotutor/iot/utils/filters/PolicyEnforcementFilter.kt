@@ -47,10 +47,10 @@ class PolicyEnforcementFilter(
                 if (it) {
                     chain.filter(exchange)
                 } else {
-                    createMonoError<Void>(AccessDeniedException(IOTError.IOT0103))
-                        .logOnError(logger, IOTError.IOT0103.errorCode, IOTError.IOT0103.message)
+                    createMonoError<Void>(AccessDeniedException(IOTError.IOT0102))
+                        .logOnError(logger, IOTError.IOT0102.errorCode, IOTError.IOT0102.message)
                         .onErrorResume {
-                            val unAuthorizedException = AccessDeniedException(IOTError.IOT0103)
+                            val unAuthorizedException = AccessDeniedException(IOTError.IOT0102)
                             val response = exchange.response
 
                             response.statusCode = HttpStatus.UNAUTHORIZED

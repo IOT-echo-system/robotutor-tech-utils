@@ -40,7 +40,7 @@ class PremisesApiFilter(private val premisesGateway: PremisesGateway, private va
     }
 
     private fun sendUnAuthorizedException(exchange: ServerWebExchange): Mono<Void> {
-        val unAuthorizedException = AccessDeniedException(IOTError.IOT0104)
+        val unAuthorizedException = AccessDeniedException(IOTError.IOT0103)
         val response = exchange.response
 
         response.statusCode = HttpStatus.UNAUTHORIZED
@@ -56,9 +56,33 @@ fun getPremisesId(exchange: ServerWebExchange): String {
 }
 
 fun <T : Any> validatePremisesOwner(premisesData: PremisesData, executeIf: () -> Mono<T>): Mono<T> {
-    return createMono(premisesData.user.role == PremisesRole.OWNER)
+    return validatePremisesRole(premisesData, PremisesRole.OWNER, executeIf)
+}
+
+fun <T : Any> validatePremisesAdmin(premisesData: PremisesData, executeIf: () -> Mono<T>): Mono<T> {
+    return validatePremisesRole(premisesData, PremisesRole.ADMIN, executeIf)
+}
+
+fun <T : Any> validatePremisesUser(premisesData: PremisesData, executeIf: () -> Mono<T>): Mono<T> {
+    return validatePremisesRole(premisesData, PremisesRole.USER, executeIf)
+}
+
+fun <T : Any> validatePremisesBoard(premisesData: PremisesData, executeIf: () -> Mono<T>): Mono<T> {
+    return validatePremisesRole(premisesData, PremisesRole.BOARD, executeIf)
+}
+
+fun <T : Any> validatePremisesVoice(premisesData: PremisesData, executeIf: () -> Mono<T>): Mono<T> {
+    return validatePremisesRole(premisesData, PremisesRole.VOICE, executeIf)
+}
+
+fun <T : Any> validatePremisesRole(premisesData: PremisesData, role: PremisesRole, executeIf: () -> Mono<T>): Mono<T> {
+    return createMono(isRoleAllowed(premisesData.source.role, role))
         .flatMap {
             if (it) executeIf()
-            else createMonoError(UnAuthorizedException(IOTError.IOT0104))
+            else createMonoError(UnAuthorizedException(IOTError.IOT0106))
         }
+}
+
+private fun isRoleAllowed(sourceRole: PremisesRole, validateRole: PremisesRole): Boolean {
+    return sourceRole.rank >= validateRole.rank
 }

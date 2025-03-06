@@ -28,7 +28,7 @@ class PremisesDataResolver : HandlerMethodArgumentResolver {
             if (premisesData.isPresent) {
                 createMono(premisesData.get())
             } else {
-                createMonoError(UnAuthorizedException(IOTError.IOT0106))
+                createMonoError(UnAuthorizedException(IOTError.IOT0105))
             }
         }
     }

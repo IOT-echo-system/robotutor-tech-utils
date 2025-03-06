@@ -28,7 +28,7 @@ class UserDataResolver : HandlerMethodArgumentResolver {
             if (userData.isPresent) {
                 createMono(userData.get())
             } else {
-                createMonoError(UnAuthorizedException(IOTError.IOT0105))
+                createMonoError(UnAuthorizedException(IOTError.IOT0104))
             }
         }
     }
