@@ -17,7 +17,7 @@ publishing {
             from(components["java"])
             groupId = "com.robotutor"
             artifactId = "robotutor-tech-utils"
-            version = "1.0.44"
+            version = "1.0.45"
 
             artifact(tasks["testJar"])
 
