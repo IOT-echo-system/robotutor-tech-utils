@@ -67,16 +67,8 @@ fun <T : Any> validatePremisesUser(premisesData: PremisesData, executeIf: () -> 
     return validatePremisesRole(premisesData, PremisesRole.USER, executeIf)
 }
 
-fun <T : Any> validatePremisesBoard(premisesData: PremisesData, executeIf: () -> Mono<T>): Mono<T> {
-    return validatePremisesRole(premisesData, PremisesRole.BOARD, executeIf)
-}
-
-fun <T : Any> validatePremisesVoice(premisesData: PremisesData, executeIf: () -> Mono<T>): Mono<T> {
-    return validatePremisesRole(premisesData, PremisesRole.VOICE, executeIf)
-}
-
 fun <T : Any> validatePremisesRole(premisesData: PremisesData, role: PremisesRole, executeIf: () -> Mono<T>): Mono<T> {
-    return createMono(isRoleAllowed(premisesData.source.role, role))
+    return createMono(isRoleAllowed(premisesData.user.role, role))
         .flatMap {
             if (it) executeIf()
             else createMonoError(UnAuthorizedException(IOTError.IOT0106))

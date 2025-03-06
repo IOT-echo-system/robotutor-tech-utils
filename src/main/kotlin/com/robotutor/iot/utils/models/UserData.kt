@@ -2,7 +2,7 @@ package com.robotutor.iot.utils.models
 
 import com.robotutor.iot.utils.gateway.views.AuthenticationResponseData
 import com.robotutor.iot.utils.gateway.views.PremisesResponseData
-import com.robotutor.iot.utils.gateway.views.SourceWithRole
+import com.robotutor.iot.utils.gateway.views.UserWithRole
 
 interface IAuthenticationData
 
@@ -17,13 +17,13 @@ data class UserData(val userId: String, val roleId: String) : IAuthenticationDat
     }
 }
 
-data class PremisesData(val premisesId: String, val name: String, val source: SourceWithRole) : IAuthenticationData {
+data class PremisesData(val premisesId: String, val name: String, val user: UserWithRole) : IAuthenticationData {
     companion object {
         fun from(premisesResponseData: PremisesResponseData): PremisesData {
             return PremisesData(
                 premisesId = premisesResponseData.premisesId,
                 name = premisesResponseData.name,
-                source = premisesResponseData.source
+                user = premisesResponseData.user
             )
         }
     }
